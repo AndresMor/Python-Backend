@@ -110,6 +110,10 @@ orderItems_schema = OrderItemsSchema()
 
 
 #Endpoints
+@app.route("/")
+def hello_world():
+    return "<p>Prueba técnica</p>"
+
 @app.route('/customers', methods=['POST'])
 def create_customer():
 
