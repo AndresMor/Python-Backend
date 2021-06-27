@@ -20,7 +20,7 @@ class Customer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    phone = db.Column(db.String(10), unique=True, nullable=False)
+    phone = db.Column(db.BigInteger, unique=True, nullable=False)
     address = db.Column(db.String(80), nullable=False)
     nationality = db.Column(db.String(80), nullable=False)
     orders = db.relationship('Order', backref='customer', lazy='joined')
@@ -69,7 +69,7 @@ class CustomerSchema(ma.Schema):
 
     name = fields.String(required=True, validate=validate.Length(min=3))
     email = fields.Email()
-    phone = fields.String(required=True, validate=validate.Length(min=10))
+    phone = fields.Int(strict=True, required=True, validate=[validate.Range(min=1000000000, max=9999999999, error="Value must be 10 digits")])
     address = fields.String(required=True)
     nationality = fields.String(required=True)
 
@@ -81,7 +81,7 @@ class OrderSchema(ma.Schema):
         include_fk = True
     
     customer = ma.Nested(CustomerSchema)
-    date = fields.Date(format='%Y-%m-%d', required=True)
+    date = fields.Date(format='%Y/%m/%d', required=True)
 
 class ItemSchema(ma.Schema):
     class Meta:
@@ -97,13 +97,13 @@ class OrderItemsSchema(ma.Schema):
         fields = ('id', 'customer_id', 'date', 'state', 'items')
         include_fk = True
     
-    items = ma.Nested(ItemSchema, many=True)
+    items = ma.Nested(ItemSchema(exclude=['order']), many=True)
 
 customer_schema = CustomerSchema()
 customers_schema = CustomerSchema(many=True)
 
 order_schema = OrderSchema()
-orders_schema = OrderSchema(many=True)
+orders_schema = OrderSchema(many=True, exclude=['customer'])
 
 item_schema = ItemSchema()
 orderItems_schema = OrderItemsSchema()
